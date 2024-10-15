@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-test_case = 0
+test_case = 1
 test_cases = [
     [
         pd.DataFrame({
@@ -73,22 +73,12 @@ def solution(chem_, addings_):
     "Mn_after" - хім аналіз відразу після внесення
     "timestamp" - початок внесення речовини
     """
+    # turning on the time machine
     chem_ = chem_.astype({"timestamp": "str"})
     addings_ = addings_.astype({"timestamp": "str"})
 
-    chem_['timestamp'] = chem_['timestamp'].apply(lambda x: pd.to_timedelta(x) if 'days' in str(x) else x)
-    chem_["timestamp"] = chem_["timestamp"].apply(lambda x: x + ":00" if len(x) == 5 else x)
-    chem_['timestamp'] = pd.to_datetime('1970-01-01') + pd.to_timedelta(chem_['timestamp'])
-
-    addings_['timestamp'] = addings_['timestamp'].apply(lambda x: pd.to_timedelta(x) if 'days' in str(x) else x)
-    addings_["timestamp"] = addings_["timestamp"].apply(lambda x: x + ":00" if len(x) == 5 else x)
-    addings_['timestamp'] = pd.to_datetime('1970-01-01') + pd.to_timedelta(addings_['timestamp'])
-
-    # print("--------------I`M HEAR--------------")
-    # print("Chem timestamp before formating:\n\n", chem_["timestamp"])
-
-    # chem_["timestamp"] = ("1970-01-01t" + chem_["timestamp"])
-    # addings_["timestamp"] = ("1970-01-01T" + addings_["timestamp"])
+    chem_["timestamp"] = ("1970-01-01T" + chem_["timestamp"]).astype("datetime64[ns]")
+    addings_["timestamp"] = ("1970-01-01T" + addings_["timestamp"]).astype("datetime64[ns]")
 
     result_ = pd.DataFrame({"action_id": [],
                             "Mn_add": [],
@@ -96,19 +86,16 @@ def solution(chem_, addings_):
                             "Mn_after": [],
                             "timestamp": []})
 
-    # chem_['timestamp'] = pd.to_datetime(chem_['timestamp'], format='mixed', dayfirst=True)
-    # addings_['timestamp'] = pd.to_datetime(addings_['timestamp'], format='mixed', dayfirst=True)
-    flag_of_new_day = pd.to_datetime("00:00", format='mixed', dayfirst=True).hour
-    # print("Type of chem_['timestamp']: ", type(chem_['timestamp'].values[0]))
-
-    # print("\nChem timestamp after formating:\n", chem_["timestamp"])
+    # chem_['timestamp'] = pd.to_datetime(chem_['timestamp'], format='%H:%M', dayfirst=True)
+    # addings_['timestamp'] = pd.to_datetime(addings_['timestamp'], format='%H:%M', dayfirst=True)
+    flag_of_new_day = pd.to_datetime("00:00", format='%H:%M', dayfirst=True).hour
 
     i = 1
     for index in chem_.index:
         if chem_.at[index, 'timestamp'].hour == flag_of_new_day:
-            chem_.at[index, 'timestamp'] += pd.Timedelta(days=i)
-            i += 1
-    # print("\nChem timestamp after day preprocessing:\n", chem_["timestamp"])
+            if chem_.at[index - 1, 'timestamp'].hour != flag_of_new_day:
+                chem_.at[index, 'timestamp'] += pd.Timedelta(days=i)
+                i += 1
 
     time_flag = 0
     for action in addings_.action_id.unique():
@@ -150,9 +137,9 @@ def solution(chem_, addings_):
 
     return result_
 
-print("Chem:\n", chem, "\n\n---------------------\n\n")
-print("Addings:\n", addings, "\n\n---------------------\n\n")
-print("Result:\n", result, "\n\n---------------------\n\n")
+# print("Chem:\n", chem, "\n\n---------------------\n\n")
+# print("Addings:\n", addings, "\n\n---------------------\n\n")
+# print("Result:\n", result, "\n\n---------------------\n\n")
 
 # assert (str(result) == str(solution(chem, addings)))
 print("My output:\n", solution(chem, addings))
