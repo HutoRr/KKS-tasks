@@ -86,8 +86,8 @@ def solution(chem_, addings_):
                             "Mn_after": [],
                             "timestamp": []})
 
-    # chem_['timestamp'] = pd.to_datetime(chem_['timestamp'], format='%H:%M', dayfirst=True)
-    # addings_['timestamp'] = pd.to_datetime(addings_['timestamp'], format='%H:%M', dayfirst=True)
+    chem_['timestamp'] = pd.to_datetime(chem_['timestamp'], format='%H:%M', dayfirst=True)
+    addings_['timestamp'] = pd.to_datetime(addings_['timestamp'], format='%H:%M', dayfirst=True)
     flag_of_new_day = pd.to_datetime("00:00", format='%H:%M', dayfirst=True).hour
 
     i = 1
@@ -95,6 +95,13 @@ def solution(chem_, addings_):
         if chem_.at[index, 'timestamp'].hour == flag_of_new_day:
             if chem_.at[index - 1, 'timestamp'].hour != flag_of_new_day:
                 chem_.at[index, 'timestamp'] += pd.Timedelta(days=i)
+                i += 1
+
+    i = 1
+    for index in addings_.index:
+        if addings_.at[index, 'timestamp'].hour == flag_of_new_day:
+            if addings_.at[index - 1, 'timestamp'].hour != flag_of_new_day:
+                addings_.at[index, 'timestamp'] += pd.Timedelta(days=i)
                 i += 1
 
     time_flag = 0
@@ -135,7 +142,7 @@ def solution(chem_, addings_):
 
         time_flag -= 1
 
-    return result_
+    return str(result_)
 
 # print("Chem:\n", chem, "\n\n---------------------\n\n")
 # print("Addings:\n", addings, "\n\n---------------------\n\n")
